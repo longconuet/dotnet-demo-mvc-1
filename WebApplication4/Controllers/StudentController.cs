@@ -84,15 +84,15 @@ namespace WebApplication4.Controllers
         [HttpPost]
         public JsonResult Create(AddStudentRequest request)
         {
-            //if (!ModelState.IsValid)
+            //if (!ModelState.IsValid) 
             //{
-            //    return View(student);
+            //    return View(student);aa
             //}
 
             using var db = new StudentDbContext();
             db.Students.Add(new Student
             {
-                Name = request.Name,
+                Name = request.Name, 
                 Age = request.Age
             });
             db.SaveChanges();
