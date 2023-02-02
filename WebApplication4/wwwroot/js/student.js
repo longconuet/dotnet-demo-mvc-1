@@ -4,15 +4,16 @@ $(document).ready(function () {
 });
 
 //Load Data function  
-function loadData() {
+function loadData(txtSearch = "", page = 1) {
     $.ajax({
         url: "/Student/List",
         type: "GET",
+        data: { keyword: txtSearch, page: page },
         contentType: "application/json;charset=utf-8",
         dataType: "json",
         success: function (result) {
             var html = '';
-            $.each(result, function (key, item) {
+            $.each(result.students, function (key, item) {
                 html += '<tr>';
                 html += '<td>' + (key + 1) + '</td>';
                 html += '<td>' + item.name + '</td>';
@@ -21,12 +22,72 @@ function loadData() {
                 html += '</tr>';
             });
             $('.tbody').html(html);
+
+            //create pagination
+            var pagination_string = "";
+            var pageCurrent = result.pageCurrent;
+            var totalPage = result.totalPage;
+
+            //create button previous 
+            if (pageCurrent > 1) {
+                var pagePrevious = pageCurrent - 1;
+                pagination_string += '<li class="page-item"><a href="" class="page-link" data-page=' + pagePrevious + '>Previous</a></li>';
+            }
+
+            for (i = 1; i <= totalPage; i++) {
+                if (i == pageCurrent) {
+                    pagination_string += '<li class="page-item active"><a href="" class="page-link" data-page=' + i + '>' + pageCurrent + '</a></li>';
+                } else {
+                    pagination_string += '<li class="page-item"><a href="" class="page-link" data-page=' + i + '>' + i + '</a></li>';
+                }
+            }
+
+            //create button next
+            if (pageCurrent > 0 && pageCurrent < totalPage) {
+                var pageNext = pageCurrent + 1;
+                pagination_string += '<li class="page-item"><a href="" class="page-link"  data-page=' + pageNext + '>Next</a></li>';
+            }
+
+            //load pagination
+            $("#load-pagination").html(pagination_string);
+
         },
         error: function (errormessage) {
             alert(errormessage.responseText);
         }
     });
 }  
+
+//click event pagination
+$("body").on("click", ".pagination li a", function (event) {
+    event.preventDefault();
+    var page = $(this).attr('data-page');
+
+    //load event pagination
+    var txtSearch = $(".txtSearch").val();
+    if (txtSearch != "") {
+        loadData(txtSearch, page)
+    }
+    else {
+        loadData(null, page);
+    }
+
+});
+
+// search event
+$("body").on("click", "#search", function (event) {
+    event.preventDefault();
+
+    //load event pagination
+    var txtSearch = $(".txtSearch").val();
+    if (txtSearch != "") {
+        loadData(txtSearch, 1)
+    }
+    else {
+        loadData(null, 1);
+    }
+
+});
 
 
 //Add Data Function   
@@ -39,12 +100,22 @@ function Add() {
         Name: $('#Name').val(),
         Age: $('#Age').val()
     };
+
+    //var stdObj = {
+    //    request: {
+    //        Name: $('#Name').val(),
+    //        Age: $('#Age').val()
+    //    }
+    //};
+
     $.ajax({
         url: "/Student/Create",
         data: JSON.stringify(stdObj),
         type: "POST",
         contentType: "application/json;charset=utf-8",
         dataType: "json",
+        async: true,
+        processData: false,
         success: function (result) {
             loadData();
             $('#myModal').modal('hide');

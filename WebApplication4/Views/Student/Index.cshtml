@@ -9,7 +9,13 @@
 
 <p2>Student List</p2>
 
-<div style="float: right">
+<div>
+    <div>
+        <input type="text" name="txtSearch" placeholder="Search!" class="txtSearch form-control" />
+        <button type="button" class="btn btn-primary" id="search">Search</button>
+                         
+    </div>
+
     <button type="button" class="btn btn-primary" onclick="showAddModal();">Add New</button>
 </div>
 
@@ -38,6 +44,14 @@
         }*@
     </tbody>
 </table>
+
+<div class="card-footer">
+    <nav aria-label="Page navigation example">
+        <ul class="pagination" id="load-pagination">
+        </ul>
+    </nav>
+</div>
+
 
 <div class="modal fade" id="myModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
     <div class="modal-dialog">

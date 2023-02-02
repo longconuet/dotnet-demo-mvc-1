@@ -1,5 +1,6 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using System;
+using WebApplication4.ModalViews;
 using WebApplication4.Models;
 using WebApplication4.Requests;
 
@@ -16,13 +17,47 @@ namespace WebApplication4.Controllers
             return View();
         }
 
-        public JsonResult List()
+        public JsonResult List(string keyword, int? page)
         {
             using var db = new StudentDbContext();
 
-            var students = db.Students.ToList();
+            var studentDb = db.Students.Where(x => 1 == 1);
 
-            return Json(students);
+            
+            if (!string.IsNullOrEmpty(keyword))
+            {
+                keyword = keyword.Trim().ToLower();
+                studentDb = studentDb.Where(x => x.Name.ToLower().Contains(keyword));
+            }
+
+            // paging
+            int pageSize = 5;
+            int pageIndex = page ?? 1;
+            int start = (pageIndex - 1) * pageSize;
+            int totalCount = studentDb.Count();
+            int totalPage = totalCount / pageSize;
+            if (totalCount % pageSize > 0)
+            {
+                totalPage += 1;
+            }
+
+            var students = studentDb.Skip(start).Take(pageSize).ToList();
+            int totalItem = students.Count;
+
+            return Json(new PagedStudentModal
+            {
+                Students = students.Select(x => new StudentModal
+                {
+                    Id = x.Id,
+                    Name = x.Name,
+                    Age = x.Age
+                }).ToList(),
+                TotalCount = totalCount,
+                TotalItem = totalItem,
+                TotalPage = totalPage,
+                PageSize = pageSize,
+                PageCurrent = pageIndex
+            });
         }
 
         public IActionResult Create()
